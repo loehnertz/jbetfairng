@@ -152,7 +152,7 @@ public class BetfairClient {
         this.appKey = appKey;
     }
 
-    public LoginResponse login(
+    public String login(
             String p12CertificateLocation,
             String p12CertificatePassword,
             String username,
@@ -211,7 +211,7 @@ public class BetfairClient {
             if (Constants.SUCCESS.equals(loginResult.loginStatus)) {
                 this.networkClient = new Network(this.appKey, loginResult.sessionToken);
             }
-            return loginResult;
+            return loginResult.loginStatus;
         } catch (Exception ex) {
             throw new LoginException(ex);
         } finally {

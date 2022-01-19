@@ -6,7 +6,6 @@ import com.jbetfairng.entities.TimeRange;
 import com.jbetfairng.enums.MarketProjection;
 import com.jbetfairng.enums.MarketType;
 import com.jbetfairng.enums.PriceData;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -128,8 +127,8 @@ public class Helpers {
         marketFilter.setMarketStartTime(timeRange);
 
         if (country != null)
-            marketFilter.setMarketCountries(new HashSet<>(Arrays.asList(country)));
-        marketFilter.setMarketTypeCodes(new HashSet<>(Arrays.asList("WIN")));
+            marketFilter.setMarketCountries(new HashSet<>(Collections.singletonList(country)));
+        marketFilter.setMarketTypeCodes(new HashSet<>(Collections.singletonList("WIN")));
 
         return marketFilter;
     }

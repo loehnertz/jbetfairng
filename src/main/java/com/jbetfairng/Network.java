@@ -29,16 +29,13 @@ public class Network {
 
     private final String appKey;
     private final String sessionToken;
-    private final Boolean gzipCompress;
     private final Logger tracer;
 
     public Network(
             String appKey,
-            String sessionToken,
-            Boolean gzipCompress) {
+            String sessionToken) {
         this.appKey = appKey;
         this.sessionToken = sessionToken;
-        this.gzipCompress = gzipCompress;
         this.tracer = LogManager.getFormatterLogger("Network");
     }
 
@@ -166,50 +163,11 @@ public class Network {
             post.setEntity(entity);
             HttpResponse response = client.execute(post);
 
-            String json = EntityUtils.toString(response.getEntity(), "UTF-8");
-            return json;
+            return EntityUtils.toString(response.getEntity(), "UTF-8");
         } catch (IOException exception) {
             return null;
         }
     }
-
-    /*
-    private Observable<String> request(
-            String url,
-            String requestPostData,
-            ContentType contentType,
-            String appKey,
-            String sessionToken) throws UnsupportedEncodingException {
-
-        Header[] headers = {
-                new BasicHeader("X-Application", appKey),
-                new BasicHeader("X-Authentication", sessionToken),
-                new BasicHeader("Cache-Control", "no-cache"),
-                new BasicHeader("Pragma", "no-cache")
-        };
-
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setSocketTimeout(3000)
-                .setConnectTimeout(500).build();
-        CloseableHttpAsyncClient httpclient = HttpAsyncClients.custom()
-                .setDefaultRequestConfig(requestConfig)
-                .setMaxConnPerRoute(20)
-                .setMaxConnTotal(50)
-                .setDefaultHeaders(new ArrayList<Header>(Arrays.asList(headers)))
-                .build();
-
-        return ObservableHttp.createRequest(HttpAsyncMethods.createPost(url, requestPostData, contentType), httpclient)
-                .toObservable()
-                .flatMap(new Func1<ObservableHttpResponse, Observable<String>>() {
-                    public Observable<String> call(ObservableHttpResponse response) {
-                        return response.getContent().map(new Func1<byte[], String>() {
-                            public String call(byte[] bb) {
-                                return new String(bb);
-                            }
-                        });
-                    }
-                });
-    }*/
 
     private String formatEndpoint(Endpoint endpoint) {
         return endpoint == Endpoint.Betting ? "betting" : "account";

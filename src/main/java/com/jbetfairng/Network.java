@@ -4,6 +4,7 @@ import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.jbetfairng.enums.Endpoint;
 import com.jbetfairng.enums.Exchange;
 import com.jbetfairng.util.Helpers;
@@ -23,6 +24,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.joda.time.DateTime;
 
 public class Network {
@@ -73,7 +75,6 @@ public class Network {
                 url,
                 requestData,
                 ContentType.APPLICATION_JSON,
-                "application/json",
                 appKey,
                 sessionToken);
 
@@ -83,7 +84,7 @@ public class Network {
         }.where(new TypeParameter<T>() {
         }, elementClass).getType();
 
-        JsonResponse<T> entity = gson.fromJson(result, underlyingType);
+        JsonResponse<T> entity = deserializeResponseBody(result, gson, underlyingType);
         // should be returning Observable<Betfair...> here.
         if (entity != null) {
             BetfairServerResponse<T> response = new BetfairServerResponse<T>(
@@ -110,14 +111,13 @@ public class Network {
                 "https://identitysso.betfair.com/api/keepAlive",
                 "",
                 ContentType.APPLICATION_FORM_URLENCODED,
-                "application/json",
                 this.appKey,
                 this.sessionToken);
 
         Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
         Type typeToken = new TypeToken<KeepAliveResponse>() {
         }.getType();
-        KeepAliveResponse entity = gson.fromJson(keepAliveResponse, typeToken);
+        KeepAliveResponse entity = deserializeResponseBody(keepAliveResponse, gson, typeToken);
         if (entity != null) {
             BetfairServerResponse<KeepAliveResponse> response = new BetfairServerResponse<>(
                     entity,
@@ -142,7 +142,6 @@ public class Network {
             String url,
             String requestPostData,
             ContentType contentType,
-            String acceptType,
             String appKey,
             String sessionToken) {
         Header[] headers = {
@@ -150,7 +149,7 @@ public class Network {
                 new BasicHeader("X-Authentication", sessionToken),
                 new BasicHeader("Cache-Control", "no-cache"),
                 new BasicHeader("Pragma", "no-cache"),
-                new BasicHeader("Accept", acceptType)
+                new BasicHeader("Accept", "application/json")
         };
 
         CloseableHttpClient client = HttpClientBuilder.create()
@@ -165,6 +164,16 @@ public class Network {
 
             return EntityUtils.toString(response.getEntity(), "UTF-8");
         } catch (IOException exception) {
+            return null;
+        }
+    }
+
+    @Nullable
+    private <T> T deserializeResponseBody(String responseBody, Gson gson, Type typeToken) {
+        try {
+            return gson.fromJson(responseBody, typeToken);
+        } catch (JsonSyntaxException e) {
+            tracer.error(String.format("Could not deserialize alleged JSON object %s as %s", responseBody, typeToken.getTypeName()), e);
             return null;
         }
     }

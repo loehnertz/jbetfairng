@@ -1,5 +1,7 @@
 package com.jbetfairng;
 
+import static java.lang.Integer.parseInt;
+
 import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -14,11 +16,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import org.apache.http.Header;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
@@ -29,6 +32,8 @@ import org.joda.time.DateTime;
 
 public class Network {
 
+    @Nullable
+    private final HttpHost proxy = getJvmProxy();
     private final String appKey;
     private final String sessionToken;
     private final Logger tracer;
@@ -138,32 +143,11 @@ public class Network {
         }
     }
 
-    private String requestSync(
-            String url,
-            String requestPostData,
-            ContentType contentType,
-            String appKey,
-            String sessionToken) {
-        Header[] headers = {
-                new BasicHeader("X-Application", appKey),
-                new BasicHeader("X-Authentication", sessionToken),
-                new BasicHeader("Cache-Control", "no-cache"),
-                new BasicHeader("Pragma", "no-cache"),
-                new BasicHeader("Accept", "application/json")
-        };
-
-        CloseableHttpClient client = HttpClientBuilder.create()
-                .setDefaultHeaders(new ArrayList<>(Arrays.asList(headers)))
-                .build();
-        try {
-            StringEntity entity = new StringEntity(requestPostData);
-            entity.setContentType(contentType.toString());
-            HttpPost post = new HttpPost(url);
-            post.setEntity(entity);
-            HttpResponse response = client.execute(post);
-
-            return EntityUtils.toString(response.getEntity(), "UTF-8");
-        } catch (IOException exception) {
+    private static HttpHost getJvmProxy() {
+        @Nullable String proxyHost = System.getProperty("http.proxyHost");
+        if (proxyHost != null) {
+            return new HttpHost(proxyHost, parseInt(System.getProperty("http.proxyPort")), "http");
+        } else {
             return null;
         }
     }
@@ -180,5 +164,37 @@ public class Network {
 
     private String formatEndpoint(Endpoint endpoint) {
         return endpoint == Endpoint.Betting ? "betting" : "account";
+    }
+
+    private String requestSync(
+            String url,
+            String requestPostData,
+            ContentType contentType,
+            String appKey,
+            String sessionToken) {
+        Header[] headers = {
+                new BasicHeader("X-Application", appKey),
+                new BasicHeader("X-Authentication", sessionToken),
+                new BasicHeader("Cache-Control", "no-cache"),
+                new BasicHeader("Pragma", "no-cache"),
+                new BasicHeader("Accept", "application/json")
+        };
+
+        HttpClientBuilder clientBuilder = HttpClientBuilder.create()
+                .setDefaultHeaders(new ArrayList<>(Arrays.asList(headers)));
+        if (proxy != null) clientBuilder.setProxy(proxy);
+        HttpClient client = clientBuilder.build();
+
+        try {
+            StringEntity entity = new StringEntity(requestPostData);
+            entity.setContentType(contentType.toString());
+            HttpPost post = new HttpPost(url);
+            post.setEntity(entity);
+            HttpResponse response = client.execute(post);
+
+            return EntityUtils.toString(response.getEntity(), "UTF-8");
+        } catch (IOException exception) {
+            return null;
+        }
     }
 }

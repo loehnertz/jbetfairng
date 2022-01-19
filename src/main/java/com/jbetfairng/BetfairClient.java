@@ -152,7 +152,7 @@ public class BetfairClient {
         this.appKey = appKey;
     }
 
-    public Boolean login(
+    public LoginResponse login(
             String p12CertificateLocation,
             String p12CertificatePassword,
             String username,
@@ -208,12 +208,10 @@ public class BetfairClient {
             }
             Gson gson = new Gson();
             LoginResponse loginResult = gson.fromJson(response.toString(), LoginResponse.class);
-            if (loginResult.loginStatus.equals(Constants.SUCCESS)) {
-                this.networkClient = new Network(this.appKey, loginResult.sessionToken, false);
-                return true;
-            } else {
-                return false;
+            if (Constants.SUCCESS.equals(loginResult.loginStatus)) {
+                this.networkClient = new Network(this.appKey, loginResult.sessionToken);
             }
+            return loginResult;
         } catch (Exception ex) {
             throw new LoginException(ex);
         } finally {

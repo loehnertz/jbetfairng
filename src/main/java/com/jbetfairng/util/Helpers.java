@@ -6,12 +6,11 @@ import com.jbetfairng.entities.TimeRange;
 import com.jbetfairng.enums.MarketProjection;
 import com.jbetfairng.enums.MarketType;
 import com.jbetfairng.enums.PriceData;
-import org.joda.time.DateTime;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.joda.time.DateTime;
 
 public class Helpers {
     public static boolean isNullOrEmpty(String s) {

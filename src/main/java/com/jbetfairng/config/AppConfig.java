@@ -28,6 +28,11 @@ public class AppConfig {
     @Value("${password}")
     String password;
 
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer propertyConfigInDev() {
+        return new PropertySourcesPlaceholderConfigurer();
+    }
+
     public String getCertificateFile() {
         return certificateFile;
     }
@@ -66,10 +71,5 @@ public class AppConfig {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    @Bean
-    public static PropertySourcesPlaceholderConfigurer propertyConfigInDev() {
-        return new PropertySourcesPlaceholderConfigurer();
     }
 }

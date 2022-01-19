@@ -3,6 +3,9 @@ package com.jbetfairng.entities;
 import java.util.List;
 
 public class CurrentOrderSummaryReport {
+    private List<CurrentOrderSummary> currentOrders;
+    private boolean moreAvailable;
+
     public List<CurrentOrderSummary> getCurrentOrders() {
         return currentOrders;
     }
@@ -18,7 +21,4 @@ public class CurrentOrderSummaryReport {
     public void setMoreAvailable(boolean moreAvailable) {
         this.moreAvailable = moreAvailable;
     }
-
-    private List<CurrentOrderSummary> currentOrders;
-    private boolean moreAvailable;
 }

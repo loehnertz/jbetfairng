@@ -9,5 +9,6 @@ public class JsonRequest {
     public int id;
     public Map<String, Object> params;
 
-    public JsonRequest() { }
+    public JsonRequest() {
+    }
 }

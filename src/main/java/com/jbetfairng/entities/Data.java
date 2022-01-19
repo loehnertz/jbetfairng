@@ -4,14 +4,14 @@ import com.jbetfairng.exceptions.APINGException;
 
 public class Data {
 
-	private APINGException APINGException;
+    private APINGException APINGException;
 
-	public APINGException getAPINGException() {
-		return APINGException;
-	}
+    public APINGException getAPINGException() {
+        return APINGException;
+    }
 
-	public void setAPINGException(APINGException aPINGException) {
-		APINGException = aPINGException;
-	}
+    public void setAPINGException(APINGException aPINGException) {
+        APINGException = aPINGException;
+    }
 
 }

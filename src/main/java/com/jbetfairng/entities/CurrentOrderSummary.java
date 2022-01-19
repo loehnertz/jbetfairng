@@ -1,13 +1,33 @@
 package com.jbetfairng.entities;
 
-import com.jbetfairng.enums.Side;
 import com.jbetfairng.enums.OrderStatus;
-import com.jbetfairng.enums.PersistenceType;
 import com.jbetfairng.enums.OrderType;
-
+import com.jbetfairng.enums.PersistenceType;
+import com.jbetfairng.enums.Side;
 import java.util.Date;
 
 public class CurrentOrderSummary {
+    private String BetId;
+    private String marketId;
+    private long selectionId;
+    private double handicap;
+    private PriceSize priceSize;
+    private double bspLiability;
+    private Side side;
+    private OrderStatus status;
+    private PersistenceType persistenceType;
+    private OrderType orderType;
+    private Date placedDate;
+    private Date matchedDate;
+    private double averagePriceMatched;
+    private double sizeMatched;
+    private double sizeRemaining;
+    private double sizeLapsed;
+    private double sizeCancelled;
+    private double sizeVoided;
+    private String regulatorAuthCode;
+    private String regulatorCode;
+
     public String getBetId() {
         return BetId;
     }
@@ -167,25 +187,4 @@ public class CurrentOrderSummary {
     public void setRegulatorCode(String regulatorCode) {
         this.regulatorCode = regulatorCode;
     }
-
-    private String BetId;
-    private String marketId;
-    private long selectionId;
-    private double handicap;
-    private PriceSize priceSize;
-    private double bspLiability;
-    private Side side;
-    private OrderStatus status;
-    private PersistenceType persistenceType;
-    private OrderType orderType;
-    private Date placedDate;
-    private Date matchedDate;
-    private double averagePriceMatched;
-    private double sizeMatched;
-    private double sizeRemaining;
-    private double sizeLapsed;
-    private double sizeCancelled;
-    private double sizeVoided;
-    private String regulatorAuthCode;
-    private String regulatorCode;
 }

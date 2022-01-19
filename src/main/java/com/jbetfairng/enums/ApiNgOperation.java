@@ -1,7 +1,7 @@
 package com.jbetfairng.enums;
 
 public enum ApiNgOperation {
-	LISTEVENTTYPES("listEventTypes"), 
+	LISTEVENTTYPES("listEventTypes"),
 	LISTCOMPETITIONS("listCompetitions"),
 	LISTTIMERANGES("listTimeRanges"),
 	LISTEVENTS("listEvents"),
@@ -11,10 +11,10 @@ public enum ApiNgOperation {
 	LISTMARKETCATALOGUE("listMarketCatalogue"),
 	LISTMARKETBOOK("listMarketBook"),
 	PLACORDERS("placeOrders");
-	
-	private String operationName;
-	
-	private ApiNgOperation(String operationName){
+
+	private final String operationName;
+
+	ApiNgOperation(String operationName) {
 		this.operationName = operationName;
 	}
 
@@ -22,6 +22,5 @@ public enum ApiNgOperation {
 		return operationName;
 	}
 
-	
 
 }

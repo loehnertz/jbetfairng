@@ -4,20 +4,52 @@ package com.jbetfairng;
 import com.google.common.base.Optional;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.jbetfairng.entities.*;
-import com.jbetfairng.enums.*;
+import com.jbetfairng.entities.AccountDetailsResponse;
+import com.jbetfairng.entities.AccountFundsResponse;
+import com.jbetfairng.entities.AccountStatementReport;
+import com.jbetfairng.entities.CancelExecutionReport;
+import com.jbetfairng.entities.CancelInstruction;
+import com.jbetfairng.entities.ClearedOrderSummaryReport;
+import com.jbetfairng.entities.CompetitionResult;
+import com.jbetfairng.entities.CountryCodeResult;
+import com.jbetfairng.entities.CurrencyRate;
+import com.jbetfairng.entities.CurrentOrderSummaryReport;
+import com.jbetfairng.entities.EventResult;
+import com.jbetfairng.entities.EventTypeResult;
+import com.jbetfairng.entities.MarketBook;
+import com.jbetfairng.entities.MarketCatalogue;
+import com.jbetfairng.entities.MarketFilter;
+import com.jbetfairng.entities.MarketProfitAndLoss;
+import com.jbetfairng.entities.MarketTypeResult;
+import com.jbetfairng.entities.MarketVersion;
+import com.jbetfairng.entities.PlaceExecutionReport;
+import com.jbetfairng.entities.PlaceInstruction;
+import com.jbetfairng.entities.PriceProjection;
+import com.jbetfairng.entities.ReplaceExecutionReport;
+import com.jbetfairng.entities.ReplaceInstruction;
+import com.jbetfairng.entities.TimeRange;
+import com.jbetfairng.entities.TimeRangeResult;
+import com.jbetfairng.entities.TransferResponse;
+import com.jbetfairng.entities.UpdateExecutionReport;
+import com.jbetfairng.entities.UpdateInstruction;
+import com.jbetfairng.entities.VenueResult;
+import com.jbetfairng.enums.BetStatus;
+import com.jbetfairng.enums.Endpoint;
+import com.jbetfairng.enums.Exchange;
+import com.jbetfairng.enums.GroupBy;
+import com.jbetfairng.enums.IncludeItem;
+import com.jbetfairng.enums.MarketProjection;
+import com.jbetfairng.enums.MarketSort;
+import com.jbetfairng.enums.MatchProjection;
+import com.jbetfairng.enums.OrderBy;
+import com.jbetfairng.enums.OrderProjection;
+import com.jbetfairng.enums.Side;
+import com.jbetfairng.enums.SortDir;
+import com.jbetfairng.enums.TimeGranularity;
+import com.jbetfairng.enums.Wallet;
 import com.jbetfairng.exceptions.LoginException;
 import com.jbetfairng.util.Constants;
 import com.jbetfairng.util.Helpers;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import java.util.HashMap;
-import java.util.List;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
@@ -25,84 +57,82 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 public class BetfairClient {
 
-    private Exchange exchange;
-    private Network networkClient;
-    private String appKey;
-    private String sessionToken;
-    private Logger LOGGER = LogManager.getLogger(BetfairClient.class);
-
-    private static String LIST_COMPETITIONS_METHOD = "SportsAPING/v1.0/listCompetitions";
-    private static String LIST_COUNTRIES_METHOD = "SportsAPING/v1.0/listCountries";
-    private static String LIST_CURRENT_ORDERS_METHOD = "SportsAPING/v1.0/listCurrentOrders";
-    private static String LIST_CLEARED_ORDERS_METHOD = "SportsAPING/v1.0/listClearedOrders";
-    private static String LIST_EVENT_TYPES_METHOD = "SportsAPING/v1.0/listEventTypes";
-    private static String LIST_EVENTS_METHOD = "SportsAPING/v1.0/listEvents";
-    private static String LIST_MARKET_CATALOGUE_METHOD = "SportsAPING/v1.0/listMarketCatalogue";
-    private static String LIST_MARKET_BOOK_METHOD = "SportsAPING/v1.0/listMarketBook";
-    private static String LIST_MARKET_PROFIT_AND_LOSS = "SportsAPING/v1.0/listMarketProfitAndLoss";
-    private static String LIST_MARKET_TYPES = "SportsAPING/v1.0/listMarketTypes";
-    private static String LIST_TIME_RANGES = "SportsAPING/v1.0/listTimeRanges";
-    private static String LIST_VENUES = "SportsAPING/v1.0/listVenues";
-    private static String PLACE_ORDERS_METHOD = "SportsAPING/v1.0/placeOrders";
-    private static String CANCEL_ORDERS_METHOD = "SportsAPING/v1.0/cancelOrders";
-    private static String REPLACE_ORDERS_METHOD = "SportsAPING/v1.0/replaceOrders";
-    private static String UPDATE_ORDERS_METHOD = "SportsAPING/v1.0/updateOrders";
-
-    private static String GET_ACCOUNT_DETAILS = "AccountAPING/v1.0/getAccountDetails";
-    private static String GET_ACCOUNT_FUNDS = "AccountAPING/v1.0/getAccountFunds";
-    private static String GET_ACCOUNT_STATEMENT = "AccountAPING/v1.0/getAccountStatement";
-    private static String LIST_CURRENCY_RATES = "AccountAPING/v1.0/listCurrencyRates";
-    private static String TRANSFER_FUNDS = "AccountAPING/v1.0/transferFunds";
-
-    private static String FILTER = "filter";
-    private static String BET_IDS = "betIds";
-    private static String RUNNER_IDS = "runnerIds";
-    private static String SIDE = "side";
-    private static String SETTLED_DATE_RANGE = "settledDateRange";
-    private static String EVENT_TYPE_IDS = "eventTypeIds";
-    private static String EVENT_IDS = "eventIds";
-    private static String BET_STATUS = "betStatus";
-    private static String PLACED_DATE_RANGE = "placedDateRange";
-    private static String DATE_RANGE = "dateRange";
-    private static String ORDER_BY = "orderBy";
-    private static String GROUP_BY = "groupBy";
-    private static String SORT_DIR = "sortDir";
-    private static String FROM_RECORD = "fromRecord";
-    private static String RECORD_COUNT = "recordCount";
-    private static String GRANULARITY = "granularity";
-    private static String MARKET_PROJECTION = "marketProjection";
-    private static String MATCH_PROJECTION = "matchProjection";
-    private static String ORDER_PROJECTION = "orderProjection";
-    private static String PRICE_PROJECTION = "priceProjection";
-    private static String SORT = "sort";
-    private static String MAX_RESULTS = "maxResults";
-    private static String MARKET_IDS = "marketIds";
-    private static String MARKET_ID = "marketId";
-    private static String INSTRUCTIONS = "instructions";
-    private static String CUSTOMER_REFERENCE = "customerRef";
-    private static String MARKET_VERSION = "marketVersion";
-    private static String INCLUDE_SETTLED_BETS = "includeSettledBets";
-    private static String INCLUDE_BSP_BETS = "includeBspBets";
-    private static String INCLUDE_ITEM_DESCRIPTION = "includeItemDescription";
-    private static String NET_OF_COMMISSION = "netOfCommission";
-    private static String FROM_CURRENCY = "fromCurrency";
-    private static String FROM = "from";
-    private static String TO = "to";
-    private static String AMOUNT = "amount";
-    private static String WALLET = "wallet";
-    private static String ITEM_DATE_RANGE = "itemDateRange";
-    private static String INCLUDE_ITEM = "includeItem";
-
-
+    private static final String LIST_COMPETITIONS_METHOD = "SportsAPING/v1.0/listCompetitions";
+    private static final String LIST_COUNTRIES_METHOD = "SportsAPING/v1.0/listCountries";
+    private static final String LIST_CURRENT_ORDERS_METHOD = "SportsAPING/v1.0/listCurrentOrders";
+    private static final String LIST_CLEARED_ORDERS_METHOD = "SportsAPING/v1.0/listClearedOrders";
+    private static final String LIST_EVENT_TYPES_METHOD = "SportsAPING/v1.0/listEventTypes";
+    private static final String LIST_EVENTS_METHOD = "SportsAPING/v1.0/listEvents";
+    private static final String LIST_MARKET_CATALOGUE_METHOD = "SportsAPING/v1.0/listMarketCatalogue";
+    private static final String LIST_MARKET_BOOK_METHOD = "SportsAPING/v1.0/listMarketBook";
+    private static final String LIST_MARKET_PROFIT_AND_LOSS = "SportsAPING/v1.0/listMarketProfitAndLoss";
+    private static final String LIST_MARKET_TYPES = "SportsAPING/v1.0/listMarketTypes";
+    private static final String LIST_TIME_RANGES = "SportsAPING/v1.0/listTimeRanges";
+    private static final String LIST_VENUES = "SportsAPING/v1.0/listVenues";
+    private static final String PLACE_ORDERS_METHOD = "SportsAPING/v1.0/placeOrders";
+    private static final String CANCEL_ORDERS_METHOD = "SportsAPING/v1.0/cancelOrders";
+    private static final String REPLACE_ORDERS_METHOD = "SportsAPING/v1.0/replaceOrders";
+    private static final String UPDATE_ORDERS_METHOD = "SportsAPING/v1.0/updateOrders";
+    private static final String GET_ACCOUNT_DETAILS = "AccountAPING/v1.0/getAccountDetails";
+    private static final String GET_ACCOUNT_FUNDS = "AccountAPING/v1.0/getAccountFunds";
+    private static final String GET_ACCOUNT_STATEMENT = "AccountAPING/v1.0/getAccountStatement";
+    private static final String LIST_CURRENCY_RATES = "AccountAPING/v1.0/listCurrencyRates";
+    private static final String TRANSFER_FUNDS = "AccountAPING/v1.0/transferFunds";
+    private static final String FILTER = "filter";
+    private static final String BET_IDS = "betIds";
+    private static final String RUNNER_IDS = "runnerIds";
+    private static final String SIDE = "side";
+    private static final String SETTLED_DATE_RANGE = "settledDateRange";
+    private static final String EVENT_TYPE_IDS = "eventTypeIds";
+    private static final String EVENT_IDS = "eventIds";
+    private static final String BET_STATUS = "betStatus";
+    private static final String PLACED_DATE_RANGE = "placedDateRange";
+    private static final String DATE_RANGE = "dateRange";
+    private static final String ORDER_BY = "orderBy";
+    private static final String GROUP_BY = "groupBy";
+    private static final String SORT_DIR = "sortDir";
+    private static final String FROM_RECORD = "fromRecord";
+    private static final String RECORD_COUNT = "recordCount";
+    private static final String GRANULARITY = "granularity";
+    private static final String MARKET_PROJECTION = "marketProjection";
+    private static final String MATCH_PROJECTION = "matchProjection";
+    private static final String ORDER_PROJECTION = "orderProjection";
+    private static final String PRICE_PROJECTION = "priceProjection";
+    private static final String SORT = "sort";
+    private static final String MAX_RESULTS = "maxResults";
+    private static final String MARKET_IDS = "marketIds";
+    private static final String MARKET_ID = "marketId";
+    private static final String INSTRUCTIONS = "instructions";
+    private static final String CUSTOMER_REFERENCE = "customerRef";
+    private static final String MARKET_VERSION = "marketVersion";
+    private static final String INCLUDE_SETTLED_BETS = "includeSettledBets";
+    private static final String INCLUDE_BSP_BETS = "includeBspBets";
+    private static final String INCLUDE_ITEM_DESCRIPTION = "includeItemDescription";
+    private static final String NET_OF_COMMISSION = "netOfCommission";
+    private static final String FROM_CURRENCY = "fromCurrency";
+    private static final String FROM = "from";
+    private static final String TO = "to";
+    private static final String AMOUNT = "amount";
+    private static final String WALLET = "wallet";
+    private static final String ITEM_DATE_RANGE = "itemDateRange";
+    private static final String INCLUDE_ITEM = "includeItem";
     /**
      * Static defined identity endpoints
      */
-    private static HashMap<Exchange, String> identityEndpoints = new HashMap<>();
+    private static final HashMap<Exchange, String> identityEndpoints = new HashMap<>();
 
     static {
         identityEndpoints.put(Exchange.RO, "https://identitysso-cert.betfair.ro/api/certlogin");
@@ -111,6 +141,11 @@ public class BetfairClient {
         identityEndpoints.put(Exchange.IT, "https://identitysso-cert.betfair.it/api/certlogin");
         identityEndpoints.put(Exchange.ES, "https://identitysso-cert.betfair.es/api/certlogin");
     }
+
+    private final Exchange exchange;
+    private final String appKey;
+    private final Logger LOGGER = LogManager.getLogger(BetfairClient.class);
+    private Network networkClient;
 
     public BetfairClient(Exchange exchange, String appKey) {
         this.exchange = exchange;
@@ -122,7 +157,6 @@ public class BetfairClient {
             String p12CertificatePassword,
             String username,
             String password) throws LoginException {
-
         if (Helpers.isNullOrWhitespace(p12CertificateLocation))
             throw new IllegalArgumentException(p12CertificateLocation);
         if (Helpers.isNullOrWhitespace(p12CertificatePassword))
@@ -162,7 +196,7 @@ public class BetfairClient {
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(request.getInputStream()));
             String inputLine;
-            StringBuffer response = new StringBuffer();
+            StringBuilder response = new StringBuilder();
 
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
@@ -175,8 +209,7 @@ public class BetfairClient {
             Gson gson = new Gson();
             LoginResponse loginResult = gson.fromJson(response.toString(), LoginResponse.class);
             if (loginResult.loginStatus.equals(Constants.SUCCESS)) {
-                this.sessionToken = loginResult.sessionToken;
-                this.networkClient = new Network(this.appKey, this.sessionToken, false);
+                this.networkClient = new Network(this.appKey, loginResult.sessionToken, false);
                 return true;
             } else {
                 return false;
@@ -277,7 +310,7 @@ public class BetfairClient {
                 args);
     }
 
-    public BetfairServerResponse<List<MarketTypeResult>> listMarketTypes( MarketFilter marketFilter) {
+    public BetfairServerResponse<List<MarketTypeResult>> listMarketTypes(MarketFilter marketFilter) {
         HashMap<String, Object> args = new HashMap<>();
         args.put(FILTER, marketFilter);
         return networkClient.Invoke(

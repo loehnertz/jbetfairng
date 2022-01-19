@@ -5,8 +5,8 @@ package com.jbetfairng.util;
  */
 public class Constants {
 
+    public static final String SUCCESS = "SUCCESS";
+
     public Constants() {
     }
-
-    public static final String SUCCESS = "SUCCESS";
 }

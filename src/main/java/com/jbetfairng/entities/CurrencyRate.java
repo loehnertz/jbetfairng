@@ -1,23 +1,23 @@
 package com.jbetfairng.entities;
 
 public class CurrencyRate {
+    private String currencyCode;
+    private double rate;
+
+    public String getCurrencyCode() {
+        return currencyCode;
+    }
+
     public void setCurrencyCode(String currencyCode) {
         this.currencyCode = currencyCode;
     }
-    
-    public String getCurrencyCode() {
-        return currencyCode;
+
+    public double getRate() {
+        return rate;
     }
 
     public void setRate(double rate) {
         this.rate = rate;
     }
-    
-    public double getRate() {
-        return rate;
-    }
-
-    private String currencyCode;
-    private double rate;
 }
 

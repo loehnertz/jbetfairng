@@ -1,11 +1,16 @@
 package com.jbetfairng.entities;
 
 public class EventResult {
+    private Event event;
+    private int marketCount;
+
     public Event getEvent() {
         return event;
     }
 
-    public void setEvent(Event event) { this.event = event; }
+    public void setEvent(Event event) {
+        this.event = event;
+    }
 
     public int getMarketCount() {
         return marketCount;
@@ -14,8 +19,5 @@ public class EventResult {
     public void setMarketCount(int marketCount) {
         this.marketCount = marketCount;
     }
-
-    private Event event;
-    private int marketCount;
 
 }

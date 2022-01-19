@@ -1,7 +1,6 @@
 package com.jbetfairng;
 
 import com.google.gson.reflect.TypeToken;
-
 import java.lang.reflect.Type;
 
 public class JsonResponse<T> {

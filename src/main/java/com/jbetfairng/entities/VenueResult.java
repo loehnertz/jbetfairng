@@ -1,22 +1,22 @@
 package com.jbetfairng.entities;
 
-public class VenueResult { 
+public class VenueResult {
+    private String venue;
+    private int marketCount;
+
+    public String getVenue() {
+        return venue;
+    }
+
     public void setVenue(String venue) {
         this.venue = venue;
     }
-    
-    public String getVenue() {
-        return venue;
+
+    public int getMarketCount() {
+        return marketCount;
     }
 
     public void setMarketCount(int marketCount) {
         this.marketCount = marketCount;
     }
-    
-    public int getMarketCount() {
-        return marketCount;
-    }
-
-    private String venue;
-    private int marketCount;
 }

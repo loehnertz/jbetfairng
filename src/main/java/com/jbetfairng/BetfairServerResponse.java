@@ -3,19 +3,18 @@ package com.jbetfairng;
 import org.joda.time.DateTime;
 
 public class BetfairServerResponse<T> {
-    private T response;
-    private DateTime lastByte;
-    private DateTime requestStart;
-    private long latencyMs;
-    private Boolean hasError;
+    private final T response;
+    private final DateTime lastByte;
+    private final DateTime requestStart;
+    private final long latencyMs;
+    private final Boolean hasError;
 
     public BetfairServerResponse(
             T response,
             DateTime lastByte,
             DateTime requestStart,
             long latencyMs,
-            Boolean hasError)
-    {
+            Boolean hasError) {
         this.response = response;
         this.lastByte = lastByte;
         this.requestStart = requestStart;

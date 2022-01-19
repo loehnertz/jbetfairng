@@ -1,10 +1,26 @@
 package com.jbetfairng;
 
 import com.jbetfairng.config.AppConfig;
-import com.jbetfairng.entities.*;
-import com.jbetfairng.enums.*;
+import com.jbetfairng.entities.LimitOrder;
+import com.jbetfairng.entities.MarketBook;
+import com.jbetfairng.entities.MarketCatalogue;
+import com.jbetfairng.entities.PlaceExecutionReport;
+import com.jbetfairng.entities.PlaceInstruction;
+import com.jbetfairng.entities.RunnerCatalog;
+import com.jbetfairng.entities.TimeRange;
+import com.jbetfairng.enums.Exchange;
+import com.jbetfairng.enums.ExecutionReportStatus;
+import com.jbetfairng.enums.MarketSort;
+import com.jbetfairng.enums.MarketType;
+import com.jbetfairng.enums.OrderType;
+import com.jbetfairng.enums.PersistenceType;
+import com.jbetfairng.enums.Side;
 import com.jbetfairng.exceptions.LoginException;
 import com.jbetfairng.util.Helpers;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -13,12 +29,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 
 /**
  * Created by catalin on 4/19/2017.

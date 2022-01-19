@@ -7,7 +7,7 @@ public enum ExecutionReportErrorCode {
 	INVALID_ACCOUNT_STATE("Order rejected due to the account's status (suspended, inactive, dup cards)"),
 	INVALID_WALLET_STATUS("Order rejected due to the account's wallet's status"),
 	INSUFFICIENT_FUNDS("Account has exceeded its exposure limit or available to bet limit"),
-	LOSS_LIMIT_EXCEEDED("The account has exceed the self imposed loss limit"), 
+	LOSS_LIMIT_EXCEEDED("The account has exceed the self imposed loss limit"),
 	MARKET_SUSPENDED("Market is suspended"),
 	MARKET_NOT_OPEN_FOR_BETTING("Market is not open for betting, either inactive, suspended or closed"),
 	DUPLICATE_TRANSACTION("duplicate customer referece data submitted"),
@@ -18,10 +18,10 @@ public enum ExecutionReportErrorCode {
 	NO_ACTION_REQUIRED("Order hasn't been passed to matcher as system detected there will be no state change"),
 	SERVICE_UNAVAILABLE("The requested service is unavailable"),
 	REJECTED_BY_REGULATOR("The regulator rejected the order");
-	
-	private String message;
-	
-	private ExecutionReportErrorCode(String message){
+
+	private final String message;
+
+	ExecutionReportErrorCode(String message) {
 		this.message = message;
 	}
 

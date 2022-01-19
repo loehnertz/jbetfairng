@@ -1,6 +1,9 @@
 package com.jbetfairng.entities;
 
 public class CountryCodeResult {
+    private String countryCode;
+    private int marketCount;
+
     public String getCountryCode() {
         return countryCode;
     }
@@ -16,8 +19,5 @@ public class CountryCodeResult {
     public void setMarketCount(int marketCount) {
         this.marketCount = marketCount;
     }
-
-    private String countryCode;
-    private int marketCount;
 
 }

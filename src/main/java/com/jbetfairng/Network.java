@@ -1,11 +1,17 @@
 package com.jbetfairng;
 
 import com.google.common.reflect.TypeParameter;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jbetfairng.enums.Endpoint;
 import com.jbetfairng.enums.Exchange;
 import com.jbetfairng.util.Helpers;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -13,27 +19,18 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
-
-import com.google.common.reflect.TypeToken;
-
 public class Network {
 
-    private String appKey;
-    private String sessionToken;
-    private Boolean gzipCompress;
-    private Logger tracer;
+    private final String appKey;
+    private final String sessionToken;
+    private final Boolean gzipCompress;
+    private final Logger tracer;
 
     public Network(
             String appKey,
@@ -85,7 +82,9 @@ public class Network {
 
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
-        Type underlyingType = new TypeToken<JsonResponse<T>>() {}.where(new TypeParameter<T>() {}, elementClass).getType();
+        Type underlyingType = new TypeToken<JsonResponse<T>>() {
+        }.where(new TypeParameter<T>() {
+        }, elementClass).getType();
 
         JsonResponse<T> entity = gson.fromJson(result, underlyingType);
         // should be returning Observable<Betfair...> here.

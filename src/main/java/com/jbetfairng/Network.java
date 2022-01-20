@@ -10,7 +10,6 @@ import com.google.gson.JsonSyntaxException;
 import com.jbetfairng.enums.Endpoint;
 import com.jbetfairng.enums.Exchange;
 import com.jbetfairng.util.Helpers;
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -166,6 +165,7 @@ public class Network {
         return endpoint == Endpoint.Betting ? "betting" : "account";
     }
 
+    @Nullable
     private String requestSync(
             String url,
             String requestPostData,
@@ -193,7 +193,8 @@ public class Network {
             HttpResponse response = client.execute(post);
 
             return EntityUtils.toString(response.getEntity(), "UTF-8");
-        } catch (IOException exception) {
+        } catch (Exception e) {
+            tracer.error(String.format("An error occurred when performing HTTP request to '%s'", url), e);
             return null;
         }
     }

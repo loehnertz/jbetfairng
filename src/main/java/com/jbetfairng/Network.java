@@ -142,10 +142,11 @@ public class Network {
         }
     }
 
+    @Nullable
     private static HttpHost getJvmProxy() {
-        @Nullable String proxyHost = System.getProperty("http.proxyHost");
+        @Nullable String proxyHost = System.getProperty("https.proxyHost");
         if (proxyHost != null) {
-            return new HttpHost(proxyHost, parseInt(System.getProperty("http.proxyPort")), "http");
+            return new HttpHost(proxyHost, parseInt(System.getProperty("https.proxyPort")), "https");
         } else {
             return null;
         }

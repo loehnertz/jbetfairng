@@ -1,7 +1,5 @@
 package com.jbetfairng;
 
-import static java.lang.Integer.parseInt;
-
 import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -11,19 +9,14 @@ import com.jbetfairng.enums.Endpoint;
 import com.jbetfairng.enums.Exchange;
 import com.jbetfairng.util.Helpers;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.net.ProxySelector;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.Map;
-import org.apache.http.Header;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -31,8 +24,7 @@ import org.joda.time.DateTime;
 
 public class Network {
 
-    @Nullable
-    private final HttpHost proxy = getJvmProxy();
+    public static final HttpClient HTTP_CLIENT = buildHttpClient();
     private final String appKey;
     private final String sessionToken;
     private final Logger tracer;
@@ -43,6 +35,13 @@ public class Network {
         this.appKey = appKey;
         this.sessionToken = sessionToken;
         this.tracer = LogManager.getFormatterLogger("Network");
+    }
+
+    private static HttpClient buildHttpClient() {
+        return HttpClient.newBuilder()
+                .proxy(ProxySelector.getDefault())
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .build();
     }
 
     public <T> BetfairServerResponse<T> Invoke(
@@ -78,9 +77,9 @@ public class Network {
         String result = requestSync(
                 url,
                 requestData,
-                ContentType.APPLICATION_JSON,
-                appKey,
-                sessionToken);
+                "application/json",
+                this.appKey,
+                this.sessionToken);
 
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
@@ -114,7 +113,7 @@ public class Network {
         String keepAliveResponse = this.requestSync(
                 "https://identitysso.betfair.com/api/keepAlive",
                 "",
-                ContentType.APPLICATION_FORM_URLENCODED,
+                "application/x-www-form-urlencoded",
                 this.appKey,
                 this.sessionToken);
 
@@ -143,16 +142,6 @@ public class Network {
     }
 
     @Nullable
-    private static HttpHost getJvmProxy() {
-        @Nullable String proxyHost = System.getProperty("https.proxyHost");
-        if (proxyHost != null) {
-            return new HttpHost(proxyHost, parseInt(System.getProperty("https.proxyPort")), "https");
-        } else {
-            return null;
-        }
-    }
-
-    @Nullable
     private <T> T deserializeResponseBody(String responseBody, Gson gson, Type typeToken) {
         try {
             return gson.fromJson(responseBody, typeToken);
@@ -170,30 +159,36 @@ public class Network {
     private String requestSync(
             String url,
             String requestPostData,
-            ContentType contentType,
+            String contentType,
             String appKey,
             String sessionToken) {
-        Header[] headers = {
-                new BasicHeader("X-Application", appKey),
-                new BasicHeader("X-Authentication", sessionToken),
-                new BasicHeader("Cache-Control", "no-cache"),
-                new BasicHeader("Pragma", "no-cache"),
-                new BasicHeader("Accept", "application/json")
-        };
-
-        HttpClientBuilder clientBuilder = HttpClientBuilder.create()
-                .setDefaultHeaders(new ArrayList<>(Arrays.asList(headers)));
-        if (proxy != null) clientBuilder.setProxy(proxy);
-        HttpClient client = clientBuilder.build();
-
         try {
-            StringEntity entity = new StringEntity(requestPostData);
-            entity.setContentType(contentType.toString());
-            HttpPost post = new HttpPost(url);
-            post.setEntity(entity);
-            HttpResponse response = client.execute(post);
+            URI uri;
+            try {
+                uri = new URI(url);
+            } catch (URISyntaxException e) {
+                throw new IllegalArgumentException(e);
+            }
 
-            return EntityUtils.toString(response.getEntity(), "UTF-8");
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(uri)
+                    .header("X-Application", appKey)
+                    .header("X-Authentication", sessionToken)
+                    .header("Cache-Control", "no-cache")
+                    .header("Pragma", "no-cache")
+                    .header("Accept", "application/json")
+                    .header("Content-Type", contentType)
+                    .POST(HttpRequest.BodyPublishers.ofString(requestPostData))
+                    .timeout(Duration.ofMinutes(1))
+                    .build();
+
+            HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() / 100 != 2) {
+                throw new IllegalStateException(String.format("Request '%s' did not succeed with response '%s'", request, response));
+            }
+
+            return response.body();
         } catch (Exception e) {
             tracer.error(String.format("An error occurred when performing HTTP request to '%s'", url), e);
             return null;
